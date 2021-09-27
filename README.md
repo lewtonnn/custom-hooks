@@ -1,46 +1,72 @@
-# Getting Started with Create React App
+## React custom Hooks
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### useTimeout
 
-## Available Scripts
+This hook accepts 2 parameters - callback function and delay in milliseconds. And returns an object with 3 functions:
 
-In the project directory, you can run:
+- delayedFunction - callback function you provided to useTimeout as the first parameter that will be executed, once it's
+  called, after the number of milliseconds you provided as the second parameter to useTimeout
+- resetTimeout - allows you to reset the timeout (i.e. restart it) if it's not yet timed out :) (i.e. executed)
+- cancelTimeout - allows you to cancel timeout (i.e. clearTimeout)
 
-### `yarn start`
+```javascript
+const Timeout = () => {
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+  const [counter, setCounter] = useState(0);
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+  const increment = useCallback(() => {
+    setCounter(counter => counter + 1);
+  }, []);
 
-### `yarn test`
+  const {
+    delayedFunction: incrementWithTimeout,
+    resetTimeout: resetIncrementTimeout,
+    cancelTimeout: dropIncrementTimeout
+  } = useTimeout(increment, 1000);
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  return (
+      <>
+        <p>{counter}</p>
+        <div>
+          <button onClick={incrementWithTimeout}>INCREMENT AFTER 1 SEC</button>
+          <button onClick={resetIncrementTimeout}>RESET</button>
+          <button onClick={dropIncrementTimeout}>DROP</button>
+        </div>
+      </>
+  );
+}
+```
 
-### `yarn build`
+### useInterval
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This hook accepts 2 parameters - callback function and delay in milliseconds. And returns an object with 2 functions:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- repeatedFunction - callback function you provided to useInterval as the first parameter that will be repeated, once
+  it's called, every XXX milliseconds you provided as the second parameter
+- cancelInterval - allows you to cancel the current and all the following executions of the repeatedFunction
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```javascript
+const Interval = () => {
 
-### `yarn eject`
+  const [counter, setCounter] = useState(0);
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+  const increment = () => {
+    setCounter(counter => counter + 1);
+  };
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  const {
+    repeatedFunction: IncrementEverySecond,
+    cancelInterval: cancelIncrement,
+  } = useTimeout(increment, 1000);
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+  return (
+      <>
+        <p>{counter}</p>
+        <div>
+          <button onClick={IncrementEverySecond}>INCREMENT EVERY SECOND</button>
+          <button onClick={cancelIncrement}>CANCEL INCREMENT</button>
+        </div>
+      </>
+  );
+}
+```
